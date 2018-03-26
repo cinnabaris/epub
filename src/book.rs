@@ -1,11 +1,12 @@
-use std::fs;
+use std::{fs, io, path};
 use std::io::Read;
 use std::path::PathBuf;
 use zip;
 use serde_xml_rs;
-use super::result::Result;
+use super::result::{Error, Result};
 use super::container::Container;
 use super::opf::Opf;
+use super::ncx::Ncx;
 
 pub struct Book {
     file: zip::read::ZipArchive<fs::File>,
@@ -35,11 +36,32 @@ impl Book {
         return Ok(it);
     }
 
-    // pub fn read(&mut self, name: &str) -> Result<String> {
-    //     let mut buf = String::new();
-    //     try!(try!(self.open(name)).read_to_string(&mut buf));
-    //     return Ok(buf);
-    // }
+    pub fn toc(&mut self, opf: &str, name: &str) -> Result<Ncx> {
+        match path::Path::new(opf).parent() {
+            Some(root) => match root.join(name).to_str() {
+                Some(n) => {
+                    let it: Ncx = try!(serde_xml_rs::deserialize(try!(self.open(n))));
+                    return Ok(it);
+                }
+                None => Err(Error::Io(io::Error::new(io::ErrorKind::NotFound, name))),
+            },
+            None => Err(Error::Io(io::Error::new(io::ErrorKind::NotFound, opf))),
+        }
+    }
+
+    pub fn read(&mut self, opf: &str, name: &str) -> Result<String> {
+        match path::Path::new(opf).parent() {
+            Some(root) => match root.join(name).to_str() {
+                Some(n) => {
+                    let mut buf = String::new();
+                    try!(try!(self.open(n)).read_to_string(&mut buf));
+                    return Ok(buf);
+                }
+                None => Err(Error::Io(io::Error::new(io::ErrorKind::NotFound, name))),
+            },
+            None => Err(Error::Io(io::Error::new(io::ErrorKind::NotFound, opf))),
+        }
+    }
 
     fn open<'a>(&'a mut self, name: &str) -> Result<zip::read::ZipFile<'a>> {
         let it = try!(self.file.by_name(name));

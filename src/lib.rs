@@ -30,10 +30,22 @@ mod tests {
                 match bk.container() {
                     Ok(mut ct) => {
                         println!("container: {:?}", ct);
-                        for name in ct.opf() {
-                            match bk.opf(name) {
-                                Ok(opf) => {
-                                    println!("find opf: {:?}\n{:?}", name, opf);
+                        for opf_n in ct.opf() {
+                            match bk.opf(opf_n) {
+                                Ok(mut opf) => {
+                                    println!("find opf: {:?}\n{:?}", opf_n, opf);
+                                    match opf.toc() {
+                                        Some(toc_n) => {
+                                            println!("toc: {:?}", toc_n);
+                                            match bk.toc(opf_n, toc_n) {
+                                                Ok(toc) => {
+                                                    println!("{:?}", toc);
+                                                }
+                                                Err(e) => fail(e),
+                                            }
+                                        }
+                                        None => assert!(false, "toc not find"),
+                                    }
                                 }
                                 Err(e) => fail(e),
                             }

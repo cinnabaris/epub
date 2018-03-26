@@ -2,7 +2,10 @@
 pub struct Ncx {
     pub version: String,
     pub head: Head,
-    pub docTitle: DocTitle,
+    #[serde(rename = "docTitle")]
+    pub doc_title: DocTitle,
+    #[serde(rename = "navMap")]
+    pub nav_map: NavMap,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -23,15 +26,20 @@ pub struct DocTitle {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NavMap {
-    pub navPoint: Vec<NavPoint>,
+    #[serde(rename = "navPoint")]
+    pub nav_point: Vec<NavPoint>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NavPoint {
     pub id: String,
-    pub playOrder: isize,
-    #[serde(default)]
-    pub navPoint: Vec<NavPoint>,
+    #[serde(rename = "playOrder")]
+    pub play_order: String,
+    #[serde(rename = "navLabel")]
+    pub nav_label: NavLabel,
+    pub content: Content,
+    #[serde(rename = "navPoint", default)]
+    pub nav_point: Vec<NavPoint>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

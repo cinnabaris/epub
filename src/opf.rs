@@ -1,11 +1,20 @@
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Opf {
     #[serde(rename = "unique-identifier")]
-    unique_identifier: String,
-    version: String,
-    metadata: MetaData,
-    manifest: Manifest,
-    spine: Spine,
+    pub unique_identifier: String,
+    pub version: String,
+    pub metadata: MetaData,
+    pub manifest: Manifest,
+    pub spine: Spine,
+}
+
+impl Opf {
+    pub fn toc(&mut self) -> Option<&str> {
+        match self.manifest.item.iter().find(|it| it.id == self.spine.toc) {
+            Some(it) => Some(&it.href),
+            None => None,
+        }
+    }
 }
 
 // FIXME: dc namespace

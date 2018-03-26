@@ -27,3 +27,5 @@ pub struct RootFile {
     #[serde(rename = "media-type")]
     pub media_type: String,
 }
+
+impl RootFile {}
