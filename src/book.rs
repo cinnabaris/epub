@@ -2,7 +2,9 @@ use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
 use zip;
+use serde_xml_rs;
 use super::result::Result;
+use super::meta::{Container, Opf};
 
 pub struct Book {
     file: zip::read::ZipArchive<fs::File>,
@@ -18,5 +20,22 @@ impl Book {
         let mut buf = String::new();
         try!(try!(self.file.by_name("mimetype")).read_to_string(&mut buf));
         return Ok(buf);
+    }
+
+    pub fn container(&mut self) -> Result<Container> {
+        let it: Container = try!(serde_xml_rs::deserialize(try!(self.file(
+            "META-INF/container.xml"
+        ))));
+        return Ok(it);
+    }
+
+    pub fn opf(&mut self, name: &str) -> Result<Opf> {
+        let it: Opf = try!(serde_xml_rs::deserialize(try!(self.file(name))));
+        return Ok(it);
+    }
+
+    fn file<'a>(&'a mut self, name: &str) -> Result<zip::read::ZipFile<'a>> {
+        let it = try!(self.file.by_name(name));
+        return Ok(it);
     }
 }
