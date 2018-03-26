@@ -23,10 +23,12 @@ mod tests {
     fn it_works() {
         match book::Book::new(Path::new("tmp").join("test.epub")) {
             Ok(mut bk) => {
+                // mimetype
                 match bk.mimetype() {
                     Ok(t) => println!("mimetype: {:?}", t),
                     Err(e) => fail(e),
                 };
+                // container
                 match bk.container() {
                     Ok(mut ct) => {
                         println!("container: {:?}", ct);
@@ -37,6 +39,7 @@ mod tests {
                                     match opf.toc() {
                                         Some(toc_n) => {
                                             println!("toc: {:?}", toc_n);
+                                            // test toc
                                             match bk.toc(opf_n, toc_n) {
                                                 Ok(toc) => {
                                                     println!("{:?}", toc);
@@ -53,6 +56,16 @@ mod tests {
                     }
                     Err(e) => fail(e),
                 };
+                // index
+                match bk.index() {
+                    Ok(h) => println!("index.html\n{:?}", h),
+                    Err(e) => fail(e),
+                }
+                // file types
+                match bk.show("OEBPS/toc.xhtml") {
+                    Ok((h, b)) => println!("header: {}\nbody: \n{}", h, b),
+                    Err(e) => fail(e),
+                }
             }
             Err(e) => fail(e),
         };

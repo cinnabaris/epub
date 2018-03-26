@@ -15,6 +15,13 @@ impl Opf {
             None => None,
         }
     }
+
+    pub fn media_type(&mut self, href: &str) -> Option<&str> {
+        match self.manifest.item.iter().find(|it| it.href == href) {
+            Some(it) => Some(&it.media_type),
+            None => None,
+        }
+    }
 }
 
 // FIXME: dc namespace

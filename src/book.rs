@@ -1,8 +1,10 @@
 use std::{fs, io, path};
 use std::io::Read;
 use std::path::PathBuf;
+
 use zip;
 use serde_xml_rs;
+
 use super::result::{Error, Result};
 use super::container::Container;
 use super::opf::Opf;
@@ -29,6 +31,41 @@ impl Book {
             "META-INF/container.xml"
         ))));
         return Ok(it);
+    }
+
+    pub fn index(&mut self) -> Result<String> {
+        let mut ct = try!(self.container());
+        let mut buf = String::new();
+
+        for opf_n in ct.opf() {
+            let mut opf = try!(self.opf(opf_n));
+            if let Some(toc_n) = opf.toc() {
+                let mut toc = try!(self.toc(opf_n, toc_n));
+                buf.push_str(&toc.html());
+            }
+        }
+        return Ok(buf);
+    }
+
+    pub fn show(&mut self, href: &str) -> Result<(String, String)> {
+        let mut ct = try!(self.container());
+
+        for opf_n in ct.opf() {
+            let mut opf = try!(self.opf(opf_n));
+            if let Some(root) = path::Path::new(opf_n).parent() {
+                for it in &mut opf.manifest.item {
+                    if let Some(name) = root.join(&it.href).to_str() {
+                        if name == href {
+                            let mut body = String::new();
+                            try!(try!(self.open(name)).read_to_string(&mut body));
+                            return Ok((it.media_type.clone(), body));
+                        }
+                    }
+                }
+            }
+        }
+
+        return Err(Error::Io(io::Error::new(io::ErrorKind::NotFound, href)));
     }
 
     pub fn opf(&mut self, name: &str) -> Result<Opf> {
