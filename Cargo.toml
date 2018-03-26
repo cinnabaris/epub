@@ -2,6 +2,9 @@
 name = "epub"
 version = "0.1.0"
 authors = ["Jeremy Zheng <jitang.zheng@gmail.com>"]
+description = "Parse epub book by rust."
+homepage = "https://github.com/cinnabaris/epub"
+license = "MIT"
 
 [dependencies]
 zip = "0.3"
