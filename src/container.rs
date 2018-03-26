@@ -27,10 +27,3 @@ pub struct RootFile {
     #[serde(rename = "media-type")]
     pub media_type: String,
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Opf {
-    #[serde(rename = "unique-identifier")]
-    unique_identifier: String,
-    version: String,
-}

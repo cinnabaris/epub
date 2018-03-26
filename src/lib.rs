@@ -5,7 +5,9 @@ extern crate serde_xml_rs;
 
 pub mod result;
 pub mod book;
-pub mod meta;
+pub mod container;
+pub mod opf;
+pub mod ncx;
 
 #[cfg(test)]
 mod tests {
@@ -19,7 +21,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        match book::Book::open(Path::new("tmp").join("test.epub")) {
+        match book::Book::new(Path::new("tmp").join("test.epub")) {
             Ok(mut bk) => {
                 match bk.mimetype() {
                     Ok(t) => println!("mimetype: {:?}", t),
