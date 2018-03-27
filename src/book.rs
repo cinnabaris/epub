@@ -1,6 +1,5 @@
 use std::{fs, io, path};
 use std::io::Read;
-use std::path::PathBuf;
 
 use zip;
 use serde_xml_rs;
@@ -15,9 +14,8 @@ pub struct Book {
 }
 
 impl Book {
-    pub fn new(file: PathBuf) -> Result<Book> {
-        let arc = try!(zip::ZipArchive::new(try!(fs::File::open(&file))));
-        return Ok(Book { file: arc });
+    pub fn new(file: zip::read::ZipArchive<fs::File>) -> Book {
+        return Book { file: file };
     }
 
     pub fn mimetype(&mut self) -> Result<String> {
