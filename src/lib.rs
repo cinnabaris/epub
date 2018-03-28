@@ -22,60 +22,30 @@ mod tests {
     use std::path::Path;
     use super::*;
 
-    fn fail(e: result::Error) {
-        println!("fail: {:?}", e);
-        assert!(false);
-    }
-
     #[test]
     fn it_works() {
-        match open(Path::new("tmp").join("test.epub")) {
-            Ok(mut bk) => {
-                // mimetype
-                match bk.mimetype() {
-                    Ok(t) => println!("mimetype: {:?}", t),
-                    Err(e) => fail(e),
-                };
-                // container
-                match bk.container() {
-                    Ok(mut ct) => {
-                        println!("container: {:?}", ct);
-                        for opf_n in ct.opf() {
-                            match bk.opf(opf_n) {
-                                Ok(mut opf) => {
-                                    println!("find opf: {:?}\n{:?}", opf_n, opf);
-                                    match opf.toc() {
-                                        Some(toc_n) => {
-                                            println!("toc: {:?}", toc_n);
-                                            // test toc
-                                            match bk.toc(opf_n, toc_n) {
-                                                Ok(toc) => {
-                                                    println!("{:?}", toc);
-                                                }
-                                                Err(e) => fail(e),
-                                            }
-                                        }
-                                        None => assert!(false, "toc not find"),
-                                    }
-                                }
-                                Err(e) => fail(e),
-                            }
-                        }
-                    }
-                    Err(e) => fail(e),
-                };
-                // index
-                match bk.index() {
-                    Ok(h) => println!("index.html\n{:?}", h),
-                    Err(e) => fail(e),
-                }
-                // file types
-                match bk.show("OEBPS/toc.xhtml") {
-                    Ok((h, b)) => println!("header: {}\nbody: \n{}", h, b),
-                    Err(e) => fail(e),
-                }
-            }
-            Err(e) => fail(e),
-        };
+        let mut bk = open(Path::new("tmp").join("test.epub")).unwrap();
+        // mimetype
+        let mt = bk.mimetype().unwrap();
+        println!("mimetype: {:?}", mt);
+        // container
+        let mut ct = bk.container().unwrap();
+        println!("container: {:?}", ct);
+        for opf_n in ct.opf() {
+            let mut opf = bk.opf(opf_n).unwrap();
+            println!("find opf: {:?}\n{:?}", opf_n, opf);
+            let toc_n = opf.toc().unwrap();
+            println!("toc: {:?}", toc_n);
+            // test toc
+            let toc = bk.toc(opf_n, toc_n).unwrap();
+            println!("{:?}", toc);
+        }
+
+        // index
+        let html = bk.index().unwrap();
+        println!("index.html\n{:?}", html);
+        // file types
+        let (head, body) = bk.show("OEBPS/toc.xhtml").unwrap();
+        println!("header: {}\nbody: \n{}", head, body);
     }
 }
