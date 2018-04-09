@@ -4,10 +4,10 @@ Parse EPUB books by rust.
 
 ## Usage
 
-'''toml
+```toml
 [dependencies.epub]
 git = "<https://github.com/cinnabaris/epub.git>"
-'''
+```
 
 ## Documents
 
