@@ -1,30 +1,47 @@
 extern crate epub;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+fn parse(file: PathBuf) -> epub::result::Result<()> {
+    let bk = epub::open(file)?;
+
+    // home-page
+    println!("home page: \n{}", bk.index()?);
+
+    // page content
+    match bk.list()?.first() {
+        Some((href, media_type)) => {
+            println!("---- {} {} ----", href, media_type);
+            let (body, _) = bk.show(&href)?;
+            println!("{}", String::from_utf8(body)?);
+        }
+        None => {}
+    }
+
+    // mimetype
+    println!("mime type: {}", bk.mimetype()?);
+
+    let ct = bk.container()?;
+    for opf_n in ct.opf() {
+        println!("=== find opf: {} ===", opf_n);
+        let opf = bk.opf(&opf_n)?;
+        // creator
+        let mt = opf.metadata;
+        println!("creator: {}", mt.creator.content);
+        println!("identifier: {}", mt.identifier.content);
+        println!("title: {}", mt.title.content);
+        println!("language: {}", mt.language.content);
+        println!("publisher: {}", mt.publisher.content);
+        println!("date: {}", mt.date.content);
+        for mf in opf.manifest.item {
+            println!("manifest {} {}", mf.href, mf.media_type);
+        }
+    }
+
+    Ok(())
+}
 
 #[test]
 fn it_works() {
-    let mut bk = epub::open(Path::new("tmp").join("test.epub")).unwrap();
-    // mimetype
-    let mt = bk.mimetype().unwrap();
-    println!("mimetype: {:?}", mt);
-    // container
-    let mut ct = bk.container().unwrap();
-    println!("container: {:?}", ct);
-    for opf_n in ct.opf() {
-        let mut opf = bk.opf(opf_n).unwrap();
-        println!("find opf: {:?}\n{:?}", opf_n, opf);
-        let toc_n = opf.toc().unwrap();
-        println!("toc: {:?}", toc_n);
-        // test toc
-        let toc = bk.toc(opf_n, toc_n).unwrap();
-        println!("{:?}", toc);
-    }
-
-    // index
-    let html = bk.index().unwrap();
-    println!("index.html\n{:?}", html);
-    // file types
-    let (head, body) = bk.show("OEBPS/toc.xhtml").unwrap();
-    println!("header: {}\nbody: \n{}", head, body);
+    parse(Path::new("tmp").join("test.epub")).unwrap();
 }

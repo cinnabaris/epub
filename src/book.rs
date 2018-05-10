@@ -32,33 +32,50 @@ impl Book {
         return Ok(it);
     }
 
+    // book pages (href, media_type)
+    pub fn list(&self) -> Result<Vec<(String, String)>> {
+        let mut items = Vec::new();
+        let ct = self.container()?;
+
+        for opf_n in ct.opf() {
+            let opf = self.opf(&opf_n)?;
+            if let Some(dir) = Path::new(&opf_n).parent() {
+                for mf in opf.manifest.item {
+                    if let Some(href) = dir.join(mf.href).to_str() {
+                        items.push((href.to_string(), mf.media_type))
+                    }
+                }
+            }
+        }
+        return Ok(items);
+    }
+
+    // home page
     pub fn index(&self) -> Result<String> {
         let ct = self.container()?;
         let mut buf = String::new();
 
         for opf_n in ct.opf() {
-            let mut opf = self.opf(&opf_n)?;
+            let opf = self.opf(&opf_n)?;
             if let Some(toc_n) = opf.toc() {
-                let mut toc = self.toc(&opf_n, &toc_n)?;
+                let toc = self.toc(&opf_n, &toc_n)?;
                 buf.push_str(&toc.html());
             }
         }
         return Ok(buf);
     }
 
-    pub fn show(&self, href: &String) -> Result<(String, String)> {
+    // show page (body, media_type)
+    pub fn show(&self, href: &String) -> Result<(Vec<u8>, String)> {
         let ct = self.container()?;
 
         for opf_n in ct.opf() {
-            let mut opf = self.opf(&opf_n)?;
+            let opf = self.opf(&opf_n)?;
             if let Some(root) = Path::new(&opf_n).parent() {
-                for it in &mut opf.manifest.item {
+                for it in &opf.manifest.item {
                     if let Some(name) = root.join(&it.href).to_str() {
                         if name == href {
-                            return Ok((
-                                it.media_type.clone(),
-                                String::from_utf8(self.open(&name.to_string())?)?,
-                            ));
+                            return Ok((self.open(href)?, it.media_type.clone()));
                         }
                     }
                 }
@@ -91,22 +108,6 @@ impl Book {
             None => Err(Error::Io(io::Error::new(
                 io::ErrorKind::NotFound,
                 format!("can't find toc for opf {}", opf),
-            ))),
-        }
-    }
-
-    pub fn read(&self, opf: &String, name: &String) -> Result<String> {
-        match Path::new(opf).parent() {
-            Some(root) => match root.join(name).to_str() {
-                Some(n) => Ok(String::from_utf8(self.open(&n.to_string())?)?),
-                None => Err(Error::Io(io::Error::new(
-                    io::ErrorKind::NotFound,
-                    format!("bad name {}", name),
-                ))),
-            },
-            None => Err(Error::Io(io::Error::new(
-                io::ErrorKind::NotFound,
-                format!("bad opf {}", opf),
             ))),
         }
     }
