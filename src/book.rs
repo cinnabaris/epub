@@ -33,13 +33,13 @@ impl Book {
     }
 
     pub fn index(&self) -> Result<String> {
-        let ct = try!(self.container());
+        let ct = self.container()?;
         let mut buf = String::new();
 
         for opf_n in ct.opf() {
-            let mut opf = try!(self.opf(&opf_n));
+            let mut opf = self.opf(&opf_n)?;
             if let Some(toc_n) = opf.toc() {
-                let mut toc = try!(self.toc(&opf_n, &toc_n));
+                let mut toc = self.toc(&opf_n, &toc_n)?;
                 buf.push_str(&toc.html());
             }
         }
@@ -47,10 +47,10 @@ impl Book {
     }
 
     pub fn show(&self, href: &String) -> Result<(String, String)> {
-        let ct = try!(self.container());
+        let ct = self.container()?;
 
         for opf_n in ct.opf() {
-            let mut opf = try!(self.opf(&opf_n));
+            let mut opf = self.opf(&opf_n)?;
             if let Some(root) = Path::new(&opf_n).parent() {
                 for it in &mut opf.manifest.item {
                     if let Some(name) = root.join(&it.href).to_str() {
@@ -116,7 +116,7 @@ impl Book {
         let file = file.lock();
         match file {
             Ok(mut file) => {
-                let mut file = try!(file.by_name(&name[..]));
+                let mut file = file.by_name(&name[..])?;
                 let mut buf = Vec::new();
                 file.read_to_end(&mut buf)?;
                 Ok(buf)
