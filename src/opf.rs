@@ -1,4 +1,4 @@
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Opf {
     #[serde(rename = "unique-identifier")]
     pub unique_identifier: String,
@@ -9,23 +9,23 @@ pub struct Opf {
 }
 
 impl Opf {
-    pub fn toc(&mut self) -> Option<&str> {
+    pub fn toc(&self) -> Option<String> {
         match self.manifest.item.iter().find(|it| it.id == self.spine.toc) {
-            Some(it) => Some(&it.href),
+            Some(it) => Some(it.href.clone()),
             None => None,
         }
     }
 
-    pub fn media_type(&mut self, href: &str) -> Option<&str> {
-        match self.manifest.item.iter().find(|it| it.href == href) {
-            Some(it) => Some(&it.media_type),
+    pub fn media_type(&self, href: &String) -> Option<String> {
+        match self.manifest.item.iter().find(|it| it.href == *href) {
+            Some(it) => Some(it.media_type.clone()),
             None => None,
         }
     }
 }
 
 // FIXME: dc namespace
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MetaData {
     #[serde(rename = "title")]
     pub title: Dc,
@@ -48,7 +48,7 @@ pub struct MetaData {
     pub meta: Vec<Meta>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Dc {
     #[serde(default)]
     pub id: String,
@@ -56,18 +56,18 @@ pub struct Dc {
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Meta {
     pub name: String,
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Manifest {
     pub item: Vec<Item>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
     pub id: String,
     pub href: String,
@@ -75,13 +75,13 @@ pub struct Item {
     pub media_type: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Spine {
     pub toc: String,
     pub itemref: Vec<ItemRef>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemRef {
     pub idref: String,
 }
