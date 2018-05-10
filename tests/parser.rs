@@ -5,6 +5,9 @@ use std::path::{Path, PathBuf};
 fn parse(file: PathBuf) -> epub::result::Result<()> {
     let bk = epub::open(file)?;
 
+    // identifier
+    println!("identifier: {}", bk.uid()?);
+
     // home-page
     println!("home page: \n{}", bk.index()?);
 

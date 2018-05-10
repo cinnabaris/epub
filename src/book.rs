@@ -65,6 +65,16 @@ impl Book {
         return Ok(buf);
     }
 
+    // identifier
+    pub fn uid(&self) -> Result<String> {
+        let ct = self.container()?;
+        let mut items = Vec::new();
+        for opf_n in ct.opf() {
+            items.push(self.opf(&opf_n)?.metadata.identifier.content);
+        }
+        Ok(items.join(""))
+    }
+
     // show page (body, media_type)
     pub fn show(&self, href: &String) -> Result<(Vec<u8>, String)> {
         let ct = self.container()?;
